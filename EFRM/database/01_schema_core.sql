@@ -625,5 +625,39 @@ WHERE p.PositionCode = 'INVESTIGATOR'
   AND s.ScreenCode IN ('ALERT_DETAIL','CASE_LIST','CASE_DETAIL')
   AND pm.PermissionCode IN ('EDIT','CREATE');
 
+-- ── Seed Users ───────────────────────────────────────────────────────────────
+-- Passwords:
+--   admin@upgb.in  →  Admin@2026!
+--   fraud@upgb.in  →  Fraud@2026!
+
+INSERT INTO identity.Person
+    (EmployeeCode, FullName, Email, LdapUserName, PasswordHash, IsActive, IsMfaEnabled, CreatedAt, UpdatedAt)
+VALUES
+    ('EMP001', 'System Administrator', 'admin@upgb.in', 'admin',
+     '$2b$12$CnvDA8I5deyEjWPgJl3R3uLeIzaLBVahkTrkXZUSw.HQQ7KGxYvZ2',
+     1, 0, GETUTCDATE(), GETUTCDATE()),
+
+    ('EMP002', 'Fraud Investigator',   'fraud@upgb.in', 'fraud',
+     '$2b$12$HaFVmqm2GgitpsOl7Vl4NO9FCG.Y8bftWNCMx9vsi60oYYimLdOby',
+     1, 0, GETUTCDATE(), GETUTCDATE());
+
+-- Assign SYS_ADMIN position at Head Office (LocationId=1, PositionId from SYS_ADMIN row)
+INSERT INTO identity.PersonPositionLocation
+    (PersonId, PositionId, LocationId, IsPrimary, EffectiveFrom)
+SELECT
+    (SELECT PersonId FROM identity.Person WHERE EmployeeCode = 'EMP001'),
+    (SELECT PositionId FROM identity.Position WHERE PositionCode = 'SYS_ADMIN'),
+    (SELECT LocationId FROM identity.Location WHERE LocationCode = 'HO'),
+    1, CAST(GETUTCDATE() AS DATE);
+
+-- Assign INVESTIGATOR position at Head Office
+INSERT INTO identity.PersonPositionLocation
+    (PersonId, PositionId, LocationId, IsPrimary, EffectiveFrom)
+SELECT
+    (SELECT PersonId FROM identity.Person WHERE EmployeeCode = 'EMP002'),
+    (SELECT PositionId FROM identity.Position WHERE PositionCode = 'INVESTIGATOR'),
+    (SELECT LocationId FROM identity.Location WHERE LocationCode = 'HO'),
+    1, CAST(GETUTCDATE() AS DATE);
+
 GO
 PRINT 'EFRM Database Schema created successfully.';
