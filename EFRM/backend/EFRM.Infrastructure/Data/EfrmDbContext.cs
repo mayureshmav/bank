@@ -65,10 +65,17 @@ public class EfrmDbContext(DbContextOptions<EfrmDbContext> options) : DbContext(
         mb.Entity<ApprovalRequest>().ToTable("ApprovalRequest", "approval");
         mb.Entity<ApprovalDecision>().ToTable("ApprovalDecision", "approval");
 
-        // Computed columns
+        // Computed columns (SQL Server uses DB-computed expressions; SQLite needs a non-null default)
         mb.Entity<Alert>().Property(a => a.AlertRef).ValueGeneratedOnAddOrUpdate();
         mb.Entity<FraudCase>().Property(c => c.CaseRef).ValueGeneratedOnAddOrUpdate();
         mb.Entity<ApprovalRequest>().Property(r => r.RequestRef).ValueGeneratedOnAddOrUpdate();
+
+        if (Database.ProviderName?.Contains("Sqlite") == true)
+        {
+            mb.Entity<Alert>().Property(a => a.AlertRef).HasDefaultValue("");
+            mb.Entity<FraudCase>().Property(c => c.CaseRef).HasDefaultValue("");
+            mb.Entity<ApprovalRequest>().Property(r => r.RequestRef).HasDefaultValue("");
+        }
 
         // Alert – soft enums stored as string
         mb.Entity<Alert>().Property(a => a.Status).HasConversion<string>();
