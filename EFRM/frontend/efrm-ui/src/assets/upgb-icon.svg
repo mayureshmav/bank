@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Outer shield -->
+  <path d="M24 2 L44 8 L44 24 C44 36 35 44 24 47 C13 44 4 36 4 24 L4 8 Z"
+        fill="#1a237e"/>
+
+  <!-- Inner shield highlight -->
+  <path d="M24 5 L41 10 L41 24 C41 34.5 33 41.5 24 44 C15 41.5 7 34.5 7 24 L7 10 Z"
+        fill="url(#shieldGrad)"/>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e2b9e" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#111a6b" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bank pediment / roof triangle -->
+  <polygon points="24,12 33,18 15,18" fill="white" opacity="0.95"/>
+
+  <!-- 3 columns -->
+  <rect x="16" y="18" width="3.5" height="11" rx="0.8" fill="white" opacity="0.9"/>
+  <rect x="22.2" y="18" width="3.5" height="11" rx="0.8" fill="white" opacity="0.9"/>
+  <rect x="28.5" y="18" width="3.5" height="11" rx="0.8" fill="white" opacity="0.9"/>
+
+  <!-- Base steps -->
+  <rect x="14.5" y="29" width="19" height="2.8" rx="0.8" fill="white" opacity="0.9"/>
+  <rect x="13"   y="31.8" width="22" height="1.8" rx="0.8" fill="white" opacity="0.65"/>
+
+  <!-- Orange scan line (fraud detection) -->
+  <line x1="10" y1="24.5" x2="38" y2="24.5"
+        stroke="#FF8F00" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Scan pulse dot -->
+  <circle cx="29" cy="24.5" r="2.5" fill="#FF8F00"/>
+  <circle cx="29" cy="24.5" r="4.5" fill="#FF8F00" opacity="0.25"/>
+</svg>

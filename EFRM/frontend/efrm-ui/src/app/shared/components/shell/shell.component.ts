@@ -33,8 +33,8 @@ interface NavItem {
   <mat-sidenav #drawer mode="side" [opened]="!collapsed()"
     class="sidenav" fixedInViewport>
     <div class="sidenav-header">
-      <img src="assets/upgb-logo.svg" alt="UPGB" class="logo" *ngIf="!collapsed()">
-      <span class="app-title" *ngIf="!collapsed()">EFRM</span>
+      <img src="assets/upgb-logo.svg" alt="UPGB EFRM" class="logo" *ngIf="!collapsed()">
+      <img src="assets/upgb-icon.svg" alt="UPGB" class="logo-icon" *ngIf="collapsed()">
       <button mat-icon-button (click)="collapsed.set(!collapsed())" class="collapse-btn">
         <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
       </button>
@@ -84,25 +84,88 @@ interface NavItem {
 </mat-sidenav-container>
   `,
   styles: [`
+/* Shell container */
 .shell-container { height: 100vh; }
+
+/* ── Sidenav ────────────────────────────────────────────────────── */
 .sidenav {
-  width: 240px; background: #1a237e; color: #fff;
-  transition: width 200ms ease;
+  width: 248px;
+  background: linear-gradient(180deg, #1a237e 0%, #283593 100%);
+  color: #fff;
+  transition: width 220ms cubic-bezier(.4,0,.2,1);
+  border-right: none !important;
+  box-shadow: 2px 0 16px rgba(26,35,126,.2);
 }
+
+/* Header: logo + title */
 .sidenav-header {
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px; border-bottom: 1px solid rgba(255,255,255,.15);
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 8px;
 }
-.logo { height: 36px; }
-.app-title { font-size: 18px; font-weight: 700; color: #fff; }
-.collapse-btn { margin-left: auto; color: #fff; }
-mat-nav-list a { color: rgba(255,255,255,.8); border-radius: 8px; margin: 2px 8px; }
-mat-nav-list a.active-link { background: rgba(255,255,255,.15); color: #fff; }
-.top-bar { background: #283593; box-shadow: 0 2px 4px rgba(0,0,0,.3); }
+.logo      { height: 34px; flex: 1; }
+.logo-icon { height: 28px; width: 28px; margin: 0 auto; }
+.collapse-btn { color: rgba(255,255,255,.6); flex-shrink: 0; }
+.collapse-btn:hover { color: #fff; }
+
+/* Nav links */
+mat-nav-list {
+  padding: 0 8px !important;
+}
+mat-nav-list a {
+  color: rgba(255,255,255,.7) !important;
+  border-radius: 10px !important;
+  margin: 2px 0 !important;
+  height: 44px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: background .15s, color .15s !important;
+}
+mat-nav-list a:hover {
+  background: rgba(255,255,255,.08) !important;
+  color: #fff !important;
+}
+mat-nav-list a.active-link {
+  background: rgba(255,255,255,.18) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: inset 3px 0 0 #f48fb1;
+}
+
+/* ── Top toolbar ────────────────────────────────────────────────── */
+.top-bar {
+  background: #fff !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06) !important;
+  color: #212121 !important;
+  height: 58px !important;
+}
 .spacer { flex: 1; }
-.user-chip { display: flex; align-items: center; gap: 6px; color: #fff; }
-.position-tag { opacity: .7; margin-left: 4px; font-size: 11px; }
-.content-area { padding: 24px; background: #f5f5f5; min-height: calc(100vh - 64px); }
+
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  color: #212121 !important;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f4f6f9;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.user-chip mat-icon { color: #3949ab; }
+.position-tag {
+  font-size: 11px; color: #757575; font-weight: 400;
+  margin-left: 2px;
+}
+
+/* ── Content area ───────────────────────────────────────────────── */
+.content-area {
+  padding: 20px 24px;
+  background: #eef0f5;
+  min-height: calc(100vh - 58px);
+  overflow-y: auto;
+}
   `]
 })
 export class ShellComponent {

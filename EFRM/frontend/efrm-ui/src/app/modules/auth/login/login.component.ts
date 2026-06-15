@@ -24,7 +24,7 @@ import { AuthService } from '../../../core/services/auth.service';
   <div class="login-card-wrap">
     <!-- Bank branding -->
     <div class="brand">
-      <div class="brand-logo">🏦</div>
+      <img src="assets/upgb-icon.svg" alt="UPGB" class="brand-logo-img">
       <h1>UPGB EFRM</h1>
       <p>Enterprise Fraud Risk Management</p>
     </div>
@@ -95,7 +95,7 @@ import { AuthService } from '../../../core/services/auth.service';
 }
 .login-card-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; }
 .brand { text-align: center; color: #fff; }
-.brand-logo { font-size: 56px; margin-bottom: 8px; }
+.brand-logo-img { width: 72px; height: 72px; margin-bottom: 12px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); }
 .brand h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 2px; }
 .brand p  { margin: 4px 0 0; opacity: .8; font-size: 14px; }
 .login-card { width: 420px; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
