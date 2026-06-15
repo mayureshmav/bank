@@ -1,6 +1,7 @@
 using EFRM.Core.Entities.Identity;
 using EFRM.Core.Entities.Fraud;
 using EFRM.Core.Entities.Approval;
+using EFRM.Core.Entities.Audit;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFRM.Infrastructure.Data;
@@ -33,6 +34,9 @@ public class EfrmDbContext(DbContextOptions<EfrmDbContext> options) : DbContext(
     public DbSet<ApprovalMatrix> ApprovalMatrices => Set<ApprovalMatrix>();
     public DbSet<ApprovalRequest> ApprovalRequests => Set<ApprovalRequest>();
     public DbSet<ApprovalDecision> ApprovalDecisions => Set<ApprovalDecision>();
+
+    // Audit
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -85,6 +89,33 @@ public class EfrmDbContext(DbContextOptions<EfrmDbContext> options) : DbContext(
         mb.Entity<Watchlist>().HasIndex(w => new { w.EntityType, w.EntityValue });
         mb.Entity<Person>().HasIndex(p => p.LdapUserName);
         mb.Entity<ApprovalRequest>().HasIndex(r => r.Status);
+
+        // Explicit primary keys for non-convention property names
+        mb.Entity<Location>().HasKey(e => e.LocationId);
+        mb.Entity<Position>().HasKey(e => e.PositionId);
+        mb.Entity<Person>().HasKey(e => e.PersonId);
+        mb.Entity<PersonPositionLocation>().HasKey(e => e.AssignmentId);
+        mb.Entity<Screen>().HasKey(e => e.ScreenId);
+        mb.Entity<Permission>().HasKey(e => e.PermissionId);
+        mb.Entity<PositionScreenPermission>().HasKey(e => new { e.PositionId, e.ScreenId, e.PermissionId });
+        mb.Entity<UserSession>().HasKey(e => e.SessionId);
+
+        mb.Entity<Alert>().HasKey(e => e.AlertId);
+        mb.Entity<AlertNote>().HasKey(e => e.NoteId);
+        mb.Entity<FraudCase>().HasKey(e => e.CaseId);
+        mb.Entity<CaseNote>().HasKey(e => e.NoteId);
+        mb.Entity<CaseEvidence>().HasKey(e => e.EvidenceId);
+        mb.Entity<FraudRule>().HasKey(e => e.RuleId);
+        mb.Entity<Watchlist>().HasKey(e => e.WatchlistId);
+
+        mb.Entity<DocumentType>().HasKey(e => e.DocTypeId);
+        mb.Entity<ApprovalStage>().HasKey(e => e.StageId);
+        mb.Entity<ApprovalMatrix>().HasKey(e => e.MatrixId);
+        mb.Entity<ApprovalRequest>().HasKey(e => e.RequestId);
+        mb.Entity<ApprovalDecision>().HasKey(e => e.DecisionId);
+
+        // Audit log is in a separate schema not mapped by default — add if needed
+        mb.Entity<EFRM.Core.Entities.Audit.AuditLog>().ToTable("AuditLog", "audit").HasKey(e => e.AuditId);
 
         // PPL active constraint navigation
         mb.Entity<PersonPositionLocation>()

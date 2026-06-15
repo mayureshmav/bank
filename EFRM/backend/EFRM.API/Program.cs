@@ -1,5 +1,6 @@
 using System.Text;
 using EFRM.API.Middleware;
+using EFRM.Core.Entities.Identity;
 using EFRM.Infrastructure.Data;
 using EFRM.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,14 +22,29 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // ── Database ─────────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<EfrmDbContext>(opts =>
-    opts.UseSqlServer(
-        builder.Configuration.GetConnectionString("EFRM"),
-        sql => sql.CommandTimeout(60).EnableRetryOnFailure(3)));
+var connStr = builder.Configuration.GetConnectionString("EFRM") ?? "";
+if (builder.Environment.IsDevelopment() && connStr.StartsWith("Data Source="))
+{
+    builder.Services.AddDbContext<EfrmDbContext>(opts =>
+        opts.UseSqlite(connStr));
+}
+else
+{
+    builder.Services.AddDbContext<EfrmDbContext>(opts =>
+        opts.UseSqlServer(connStr,
+            sql => sql.CommandTimeout(60).EnableRetryOnFailure(3)));
+}
 
-// ── Redis Cache ───────────────────────────────────────────────────────────────
-builder.Services.AddStackExchangeRedisCache(opts =>
-    opts.Configuration = builder.Configuration.GetConnectionString("Redis"));
+// ── Cache (Redis in prod, in-memory in dev) ───────────────────────────────────
+var redisConn = builder.Configuration.GetConnectionString("Redis") ?? "";
+if (!string.IsNullOrWhiteSpace(redisConn))
+{
+    builder.Services.AddStackExchangeRedisCache(opts => opts.Configuration = redisConn);
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 // ── Application Services ──────────────────────────────────────────────────────
 builder.Services.AddScoped<AccessControlService>();
@@ -36,7 +52,7 @@ builder.Services.AddScoped<ApprovalEngineService>();
 builder.Services.AddScoped<AuthService>();
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
-var jwtKey   = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key not configured");
+var jwtKey    = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key not configured");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "EFRM";
 var jwtAud    = builder.Configuration["Jwt:Audience"] ?? "EFRM-Users";
 
@@ -72,15 +88,15 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title   = "EFRM API – Uttar Pradesh Gramin Bank",
-        Version = "v1",
+        Title       = "EFRM API – Uttar Pradesh Gramin Bank",
+        Version     = "v1",
         Description = "Enterprise Fraud Risk Management REST API"
     });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In   = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
+        In     = ParameterLocation.Header,
+        Name   = "Authorization",
+        Type   = SecuritySchemeType.Http,
         Scheme = "bearer",
         BearerFormat = "JWT"
     });
@@ -92,9 +108,18 @@ builder.Services.AddSwaggerGen(c =>
 
 // ── Health Checks ─────────────────────────────────────────────────────────────
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<EfrmDbContext>("sql-server");
+    .AddDbContextCheck<EfrmDbContext>("database");
 
 var app = builder.Build();
+
+// ── Dev: auto-create schema + seed users ─────────────────────────────────────
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<EfrmDbContext>();
+    db.Database.EnsureCreated();
+    await DevSeeder.SeedAsync(db);
+}
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
 app.UseSerilogRequestLogging();
@@ -107,11 +132,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EFRM v1"));
 }
 
-app.UseHttpsRedirection();
 app.UseCors("Angular");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<LocationScopeMiddleware>(); // injects visible location IDs into request context
+app.UseMiddleware<LocationScopeMiddleware>();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
